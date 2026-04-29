@@ -9,6 +9,7 @@ Personal Life Operating System foundations.
   - `POST /api/sync/finance`
   - `POST /api/sync/calendar`
   - `GET /api/overview`
+- File-backed local persistence at `.data/lifeos.json`.
 - Automated tests for metrics, insights, and API flow.
 
 ## Quick start
@@ -18,4 +19,4 @@ npm run dev
 ```
 
 ## Next build step
-Replace in-memory store with persistent Postgres tables and connect real Google OAuth + source integrations.
+Migrate file-backed persistence to Postgres tables and add Google OAuth with real Sheets/Calendar sync adapters.

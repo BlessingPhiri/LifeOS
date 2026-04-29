@@ -1,4 +1,10 @@
-export const store = {
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+
+const dataDir = path.resolve(process.cwd(), '.data');
+const dataFile = path.join(dataDir, 'lifeos.json');
+
+const defaultState = () => ({
   finance: {
     assets: 0,
     liabilities: 0,
@@ -10,16 +16,38 @@ export const store = {
   calendar: {
     todayEvents: []
   }
-};
+});
 
-export function resetStore() {
-  store.finance = {
-    assets: 0,
-    liabilities: 0,
-    monthIncome: 0,
-    monthExpenses: 0,
-    monthBudget: 0,
-    transactions: []
-  };
-  store.calendar = { todayEvents: [] };
+export async function readState() {
+  try {
+    const raw = await fs.readFile(dataFile, 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    const initial = defaultState();
+    await writeState(initial);
+    return initial;
+  }
+}
+
+export async function writeState(state) {
+  await fs.mkdir(dataDir, { recursive: true });
+  await fs.writeFile(dataFile, JSON.stringify(state, null, 2), 'utf8');
+}
+
+export async function updateFinance(finance) {
+  const state = await readState();
+  state.finance = finance;
+  await writeState(state);
+  return state.finance;
+}
+
+export async function updateCalendar(calendar) {
+  const state = await readState();
+  state.calendar = calendar;
+  await writeState(state);
+  return state.calendar;
+}
+
+export async function resetStore() {
+  await writeState(defaultState());
 }

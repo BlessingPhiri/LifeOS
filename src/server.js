@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { generateInsights } from './insights.js';
 import { habitScore, monthlyNetIncome, netWorth, savingsRate } from './metrics.js';
-import { store } from './store.js';
+import { readState, updateCalendar, updateFinance } from './store.js';
 
 function sendJson(res, status, body) {
   res.writeHead(status, { 'content-type': 'application/json' });
@@ -45,20 +45,21 @@ export function createServer() {
     if (req.method === 'POST' && req.url === '/api/sync/finance') {
       const body = await parseJson(req);
       if (!body) return sendJson(res, 400, { error: 'Invalid JSON body.' });
-      store.finance = normalizeFinance(body);
-      return sendJson(res, 200, { ok: true, finance: store.finance });
+      const finance = await updateFinance(normalizeFinance(body));
+      return sendJson(res, 200, { ok: true, finance });
     }
 
     if (req.method === 'POST' && req.url === '/api/sync/calendar') {
       const body = await parseJson(req);
       if (!body) return sendJson(res, 400, { error: 'Invalid JSON body.' });
-      store.calendar = normalizeCalendar(body);
-      return sendJson(res, 200, { ok: true, calendar: store.calendar });
+      const calendar = await updateCalendar(normalizeCalendar(body));
+      return sendJson(res, 200, { ok: true, calendar });
     }
 
     if (req.method === 'GET' && req.url === '/api/overview') {
-      const finance = store.finance;
-      const calendar = store.calendar;
+      const state = await readState();
+      const finance = state.finance;
+      const calendar = state.calendar;
       const dashboard = {
         netWorth: netWorth(finance),
         monthNetIncome: monthlyNetIncome({ income: finance.monthIncome, expenses: finance.monthExpenses }),
