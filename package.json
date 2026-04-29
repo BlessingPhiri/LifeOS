@@ -1,0 +1,10 @@
+{
+  "name": "life-os",
+  "version": "0.1.0",
+  "description": "Personal Life Operating System foundations",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "start": "node src/demo.js"
+  }
+}
