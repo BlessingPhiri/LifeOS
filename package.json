@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "start": "node src/demo.js"
+    "start": "node src/demo.js",
+    "dev": "node src/server.js"
   }
 }

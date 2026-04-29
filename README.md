@@ -5,14 +5,17 @@ Personal Life Operating System foundations.
 ## What is implemented
 - Core KPI engine for finance, habits, and schedule load.
 - Deterministic insight generator for actionable alerts.
-- Demo snapshot script to validate dashboard-level outputs.
-- Automated tests for metrics and insights.
+- Minimal API layer for ingestion and overview snapshots:
+  - `POST /api/sync/finance`
+  - `POST /api/sync/calendar`
+  - `GET /api/overview`
+- Automated tests for metrics, insights, and API flow.
 
 ## Quick start
 ```bash
 npm test
-npm start
+npm run dev
 ```
 
 ## Next build step
-Implement API ingestion endpoints for Google Sheets + Google Calendar normalization and store results in a relational schema.
+Replace in-memory store with persistent Postgres tables and connect real Google OAuth + source integrations.
