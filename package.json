@@ -4,7 +4,7 @@
   "description": "Personal Life Operating System foundations",
   "type": "module",
   "scripts": {
-    "test": "node --test",
+    "test": "node --test --test-concurrency=1",
     "start": "node src/demo.js",
     "dev": "node src/server.js"
   }

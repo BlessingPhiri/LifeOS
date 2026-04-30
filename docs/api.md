@@ -17,3 +17,8 @@ Validation (422):
 
 ## GET /api/overview
 Returns dashboard KPIs, recent transactions, today events, and top insights.
+
+
+## POST /api/quick-capture
+Creates a quick capture record for transaction, habit, note, task, or mood.
+Returns `201` on success and `422` for validation errors.

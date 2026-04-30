@@ -1,8 +1,9 @@
 import http from 'node:http';
 import { generateInsights } from './insights.js';
 import { habitScore, monthlyNetIncome, netWorth, savingsRate } from './metrics.js';
-import { readState, updateCalendar, updateFinance } from './store.js';
+import { addCapture, readState, updateCalendar, updateFinance } from './store.js';
 import { validateCalendarPayload, validateFinancePayload } from './validation.js';
+import { normalizeCapture, validateCapturePayload } from './capture.js';
 
 function sendJson(res, status, body) {
   res.writeHead(status, { 'content-type': 'application/json' });
@@ -61,6 +62,16 @@ export function createServer() {
       return sendJson(res, 200, { ok: true, calendar });
     }
 
+
+    if (req.method === 'POST' && req.url === '/api/quick-capture') {
+      const body = await parseJson(req);
+      if (!body) return sendJson(res, 400, { error: 'Invalid JSON body.' });
+      const errors = validateCapturePayload(body);
+      if (errors.length) return sendJson(res, 422, { error: 'Validation failed.', details: errors });
+      const capture = await addCapture(normalizeCapture(body));
+      return sendJson(res, 201, { ok: true, capture });
+    }
+
     if (req.method === 'GET' && req.url === '/api/overview') {
       const state = await readState();
       const finance = state.finance;
@@ -83,7 +94,8 @@ export function createServer() {
         dashboard,
         recentTransactions: finance.transactions.slice(0, 5),
         todayEvents: calendar.todayEvents,
-        insights: insights.slice(0, 3)
+        insights: insights.slice(0, 3),
+        captures: state.captures.slice(0, 10)
       });
     }
 

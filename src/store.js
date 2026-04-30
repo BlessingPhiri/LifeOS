@@ -15,13 +15,16 @@ const defaultState = () => ({
   },
   calendar: {
     todayEvents: []
-  }
+  },
+  captures: []
 });
 
 export async function readState() {
   try {
     const raw = await fs.readFile(dataFile, 'utf8');
-    return JSON.parse(raw);
+    const state = JSON.parse(raw);
+    if (!Array.isArray(state.captures)) state.captures = [];
+    return state;
   } catch {
     const initial = defaultState();
     await writeState(initial);
@@ -46,6 +49,14 @@ export async function updateCalendar(calendar) {
   state.calendar = calendar;
   await writeState(state);
   return state.calendar;
+}
+
+export async function addCapture(capture) {
+  const state = await readState();
+  state.captures.unshift(capture);
+  state.captures = state.captures.slice(0, 100);
+  await writeState(state);
+  return capture;
 }
 
 export async function resetStore() {

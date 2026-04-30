@@ -9,6 +9,7 @@ Personal Life Operating System foundations.
   - `POST /api/sync/finance`
   - `POST /api/sync/calendar`
   - `GET /api/overview`
+  - `POST /api/quick-capture`
 - File-backed local persistence at `.data/lifeos.json`.
 - Validation for sync payloads with structured 422 responses.
 - Automated tests for metrics, insights, and API flow.
