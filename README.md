@@ -33,3 +33,11 @@ Use a public-link sheet tab and call:
 `POST /api/sync/finance/google-sheet?spreadsheetId=<id>&gid=<gid>`
 
 This is a no-OAuth MVP path. Later we can upgrade to Google OAuth + private Sheets API.
+
+
+## Postgres (optional, free tier ready)
+1. Copy `.env.example` to `.env` and set `DATABASE_URL`.
+2. Apply `db/schema.sql` to your Postgres database.
+3. Start server with `npm run dev`.
+
+When enabled, Google Sheets finance imports are also persisted to Postgres.

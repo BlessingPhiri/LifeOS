@@ -14,3 +14,8 @@ This replaces pure in-memory state so data survives server restarts while keepin
 
 ## Next upgrade
 Migrate the same state model to Postgres tables and keep API contracts unchanged.
+
+
+## Postgres mode (optional now)
+If `DATABASE_URL` is set, Google Sheets finance imports are also upserted into Postgres `transactions`.
+File-backed storage remains the primary state store until full migration is completed.

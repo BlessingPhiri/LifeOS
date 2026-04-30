@@ -70,7 +70,12 @@ export function createServer() {
           transactions: normalized
         });
 
-        return sendJson(res, 200, { ok: true, imported: normalized.length, finance });
+        if (process.env.DATABASE_URL) {
+          const { importFinanceTransactions } = await import('./store.postgres.js');
+          await importFinanceTransactions(normalized);
+        }
+
+        return sendJson(res, 200, { ok: true, imported: normalized.length, finance, persistedToPostgres: Boolean(process.env.DATABASE_URL) });
       } catch (error) {
         return sendJson(res, 502, { error: error.message });
       }
