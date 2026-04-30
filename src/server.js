@@ -1,8 +1,8 @@
 import http from 'node:http';
 import { generateInsights } from './insights.js';
-import { habitScore, monthlyNetIncome, netWorth, savingsRate } from './metrics.js';
-import { addCapture, readState, updateCalendar, updateFinance } from './store.js';
-import { validateCalendarPayload, validateFinancePayload } from './validation.js';
+import { habitScore, healthScore, monthlyNetIncome, netWorth, savingsRate } from './metrics.js';
+import { addCapture, readState, updateCalendar, updateFinance, updateHealth } from './store.js';
+import { validateCalendarPayload, validateFinancePayload, validateHealthPayload } from './validation.js';
 import { normalizeCapture, validateCapturePayload } from './capture.js';
 
 function sendJson(res, status, body) {
@@ -63,6 +63,21 @@ export function createServer() {
     }
 
 
+
+    if (req.method === 'POST' && req.url === '/api/sync/health') {
+      const body = await parseJson(req);
+      if (!body) return sendJson(res, 400, { error: 'Invalid JSON body.' });
+      const errors = validateHealthPayload(body);
+      if (errors.length) return sendJson(res, 422, { error: 'Validation failed.', details: errors });
+      const health = await updateHealth({
+        sleepHours: Number(body.sleepHours || 0),
+        steps: Number(body.steps || 0),
+        exerciseMinutes: Number(body.exerciseMinutes || 0),
+        weight: body.weight == null ? null : Number(body.weight)
+      });
+      return sendJson(res, 200, { ok: true, health });
+    }
+
     if (req.method === 'POST' && req.url === '/api/quick-capture') {
       const body = await parseJson(req);
       if (!body) return sendJson(res, 400, { error: 'Invalid JSON body.' });
@@ -76,11 +91,13 @@ export function createServer() {
       const state = await readState();
       const finance = state.finance;
       const calendar = state.calendar;
+      const health = state.health || { sleepHours: 0, steps: 0, exerciseMinutes: 0, weight: null };
       const dashboard = {
         netWorth: netWorth(finance),
         monthNetIncome: monthlyNetIncome({ income: finance.monthIncome, expenses: finance.monthExpenses }),
         savingsRate: savingsRate({ income: finance.monthIncome, expenses: finance.monthExpenses }),
-        habitScore: habitScore([])
+        habitScore: habitScore([]),
+        healthScore: healthScore(health)
       };
       const insights = generateInsights({
         finance,
@@ -95,7 +112,8 @@ export function createServer() {
         recentTransactions: finance.transactions.slice(0, 5),
         todayEvents: calendar.todayEvents,
         insights: insights.slice(0, 3),
-        captures: state.captures.slice(0, 10)
+        captures: state.captures.slice(0, 10),
+        health
       });
     }
 

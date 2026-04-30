@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { netWorth, monthlyNetIncome, savingsRate, habitScore, scheduleLoadScore, runwaysMonths } from '../src/metrics.js';
+import { netWorth, monthlyNetIncome, savingsRate, habitScore, scheduleLoadScore, runwaysMonths, healthScore } from '../src/metrics.js';
 
 test('netWorth calculates assets minus liabilities', () => {
   assert.equal(netWorth({ assets: 1000, liabilities: 300 }), 700);
@@ -35,4 +35,10 @@ test('scheduleLoadScore maps hours to 0-100 cap', () => {
 test('runwaysMonths handles monthly burn and no-burn case', () => {
   assert.equal(runwaysMonths({ liquidCash: 12000, monthlyBurn: 3000 }), 4);
   assert.equal(runwaysMonths({ liquidCash: 12000, monthlyBurn: 0 }), Infinity);
+});
+
+
+test('healthScore combines sleep, steps and exercise', () => {
+  assert.equal(healthScore({ sleepHours: 8, steps: 10000, exerciseMinutes: 30 }), 100);
+  assert.ok(healthScore({ sleepHours: 6, steps: 6000, exerciseMinutes: 10 }) < 100);
 });

@@ -40,3 +40,10 @@ function roundCurrency(value) {
 function roundPercent(value) {
   return Number(Number(value).toFixed(1));
 }
+
+export function healthScore({ sleepHours = 0, steps = 0, exerciseMinutes = 0 } = {}) {
+  const sleepComponent = Math.min(100, (Number(sleepHours) / 8) * 100);
+  const stepsComponent = Math.min(100, (Number(steps) / 10000) * 100);
+  const exerciseComponent = Math.min(100, (Number(exerciseMinutes) / 30) * 100);
+  return roundPercent((sleepComponent + stepsComponent + exerciseComponent) / 3);
+}

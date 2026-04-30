@@ -3,11 +3,12 @@
 Personal Life Operating System foundations.
 
 ## What is implemented
-- Core KPI engine for finance, habits, and schedule load.
+- Core KPI engine for finance, habits, schedule load, and health score.
 - Deterministic insight generator for actionable alerts.
 - Minimal API layer for ingestion and overview snapshots:
   - `POST /api/sync/finance`
   - `POST /api/sync/calendar`
+  - `POST /api/sync/health`
   - `GET /api/overview`
   - `POST /api/quick-capture`
 - File-backed local persistence at `.data/lifeos.json`.

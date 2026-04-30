@@ -16,7 +16,13 @@ const defaultState = () => ({
   calendar: {
     todayEvents: []
   },
-  captures: []
+  captures: [],
+  health: {
+    sleepHours: 0,
+    steps: 0,
+    exerciseMinutes: 0,
+    weight: null
+  }
 });
 
 export async function readState() {
@@ -24,6 +30,7 @@ export async function readState() {
     const raw = await fs.readFile(dataFile, 'utf8');
     const state = JSON.parse(raw);
     if (!Array.isArray(state.captures)) state.captures = [];
+    if (!state.health) state.health = { sleepHours: 0, steps: 0, exerciseMinutes: 0, weight: null };
     return state;
   } catch {
     const initial = defaultState();
@@ -49,6 +56,13 @@ export async function updateCalendar(calendar) {
   state.calendar = calendar;
   await writeState(state);
   return state.calendar;
+}
+
+export async function updateHealth(health) {
+  const state = await readState();
+  state.health = health;
+  await writeState(state);
+  return state.health;
 }
 
 export async function addCapture(capture) {

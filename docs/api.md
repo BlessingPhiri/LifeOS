@@ -22,3 +22,8 @@ Returns dashboard KPIs, recent transactions, today events, and top insights.
 ## POST /api/quick-capture
 Creates a quick capture record for transaction, habit, note, task, or mood.
 Returns `201` on success and `422` for validation errors.
+
+
+## POST /api/sync/health
+Accepts health snapshot payload (`sleepHours`, `steps`, `exerciseMinutes`, optional `weight`).
+Returns normalized health snapshot and supports `422` validation responses.
