@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Life OS Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #0b1020; color: #e9eefb; }
+    .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+    .card { background: #171f39; border-radius: 12px; padding: 14px; }
+    h1 { margin: 0 0 16px; }
+    .muted { color: #9ba8cc; font-size: 14px; }
+    ul { margin: 8px 0; padding-left: 18px; }
+    code { background: #10172d; padding: 2px 6px; border-radius: 6px; }
+    input, button { padding: 8px; border-radius: 8px; border: none; }
+    input { width: 100%; margin-bottom: 8px; }
+    button { background: #4c7dff; color: #fff; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Life OS (Starter Dashboard)</h1>
+    <p class="muted">For local API use, set API base URL (e.g. <code>http://localhost:3000</code>).</p>
+
+    <div class="card">
+      <label>API Base URL</label>
+      <input id="apiBase" placeholder="http://localhost:3000" />
+      <button id="loadBtn">Load Overview</button>
+      <p class="muted" id="status"></p>
+    </div>
+
+    <div class="grid" style="margin-top:12px;">
+      <div class="card"><h3>Net Worth</h3><div id="netWorth">-</div></div>
+      <div class="card"><h3>Savings Rate</h3><div id="savingsRate">-</div></div>
+      <div class="card"><h3>Habit Score</h3><div id="habitScore">-</div></div>
+      <div class="card"><h3>Health Score</h3><div id="healthScore">-</div></div>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <h3>Top Insights</h3>
+      <ul id="insights"></ul>
+    </div>
+  </div>
+
+  <script>
+    const el = (id) => document.getElementById(id);
+    el('loadBtn').addEventListener('click', async () => {
+      const base = el('apiBase').value.trim();
+      if (!base) return (el('status').textContent = 'Enter API base URL first.');
+      el('status').textContent = 'Loading...';
+      try {
+        const res = await fetch(`${base}/api/overview`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        el('netWorth').textContent = data.dashboard?.netWorth ?? '-';
+        el('savingsRate').textContent = `${data.dashboard?.savingsRate ?? '-'}%`;
+        el('habitScore').textContent = `${data.dashboard?.habitScore ?? '-'}%`;
+        el('healthScore').textContent = `${data.dashboard?.healthScore ?? '-'}%`;
+
+        const list = el('insights');
+        list.innerHTML = '';
+        (data.insights || []).forEach((insight) => {
+          const li = document.createElement('li');
+          li.textContent = `[${insight.severity}] ${insight.message}`;
+          list.appendChild(li);
+        });
+
+        el('status').textContent = 'Loaded successfully.';
+      } catch (err) {
+        el('status').textContent = `Failed: ${err.message}. (For GitHub Pages, API must allow CORS and be publicly reachable.)`;
+      }
+    });
+  </script>
+</body>
+</html>

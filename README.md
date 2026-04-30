@@ -47,3 +47,9 @@ With `DATABASE_URL` enabled, overview attempts Postgres transaction reads first 
 
 
 Current Postgres support is **write-through mode** for finance imports, habits, habit logs, and quick captures, while file storage remains as fallback.
+
+
+## GitHub Pages friendly static starter
+A static frontend starter now exists at `docs/site/index.html` so Pages has an actual HTML entrypoint.
+
+You can host this on GitHub Pages and point it to your API URL.
