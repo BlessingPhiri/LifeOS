@@ -73,7 +73,8 @@ export function createServer() {
         sleepHours: Number(body.sleepHours || 0),
         steps: Number(body.steps || 0),
         exerciseMinutes: Number(body.exerciseMinutes || 0),
-        weight: body.weight == null ? null : Number(body.weight)
+        weight: body.weight == null ? null : Number(body.weight),
+        sleepTrend: body.sleepTrend || 'stable'
       });
       return sendJson(res, 200, { ok: true, health });
     }
@@ -87,11 +88,23 @@ export function createServer() {
       return sendJson(res, 201, { ok: true, capture });
     }
 
+    if (req.method === 'GET' && req.url === '/api/insights') {
+      const state = await readState();
+      const insights = generateInsights({
+        finance: state.finance,
+        habits: { weeklyCompletionRate: 0 },
+        health: state.health || { sleepTrend: 'stable' },
+        calendar: state.calendar,
+        projects: null
+      });
+      return sendJson(res, 200, { insights });
+    }
+
     if (req.method === 'GET' && req.url === '/api/overview') {
       const state = await readState();
       const finance = state.finance;
       const calendar = state.calendar;
-      const health = state.health || { sleepHours: 0, steps: 0, exerciseMinutes: 0, weight: null };
+      const health = state.health || { sleepHours: 0, steps: 0, exerciseMinutes: 0, weight: null, sleepTrend: 'stable' };
       const dashboard = {
         netWorth: netWorth(finance),
         monthNetIncome: monthlyNetIncome({ income: finance.monthIncome, expenses: finance.monthExpenses }),
@@ -102,7 +115,7 @@ export function createServer() {
       const insights = generateInsights({
         finance,
         habits: { weeklyCompletionRate: 0 },
-        health: null,
+        health,
         calendar,
         projects: null
       });

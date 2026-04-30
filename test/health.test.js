@@ -41,3 +41,25 @@ test('health sync validates payload', async () => {
 
   await new Promise((resolve) => server.close(resolve));
 });
+
+
+test('health sleepTrend contributes to insights endpoint', async () => {
+  await resetStore();
+  const server = createServer();
+  await new Promise((resolve) => server.listen(0, resolve));
+  const { port } = server.address();
+  const base = `http://127.0.0.1:${port}`;
+
+  await fetch(`${base}/api/sync/health`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ sleepHours: 6, steps: 5000, exerciseMinutes: 10, sleepTrend: 'down' })
+  });
+
+  const resp = await fetch(`${base}/api/insights`);
+  const json = await resp.json();
+  const hasSleepInsight = json.insights.some((item) => /sleep trend/i.test(item.message));
+  assert.equal(hasSleepInsight, true);
+
+  await new Promise((resolve) => server.close(resolve));
+});

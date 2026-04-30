@@ -55,5 +55,8 @@ export function validateHealthPayload(payload) {
   if (payload.weight != null && !Number.isFinite(Number(payload.weight))) {
     errors.push('weight must be a finite number.');
   }
+  if (payload.sleepTrend != null && !['up', 'down', 'stable'].includes(payload.sleepTrend)) {
+    errors.push("sleepTrend must be one of 'up'|'down'|'stable'.");
+  }
   return errors;
 }

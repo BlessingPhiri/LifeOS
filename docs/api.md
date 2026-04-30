@@ -25,5 +25,9 @@ Returns `201` on success and `422` for validation errors.
 
 
 ## POST /api/sync/health
-Accepts health snapshot payload (`sleepHours`, `steps`, `exerciseMinutes`, optional `weight`).
+Accepts health snapshot payload (`sleepHours`, `steps`, `exerciseMinutes`, optional `weight`, optional `sleepTrend`).
 Returns normalized health snapshot and supports `422` validation responses.
+
+
+## GET /api/insights
+Returns the prioritized insight list only (same engine used by `/api/overview`).

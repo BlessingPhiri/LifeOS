@@ -21,7 +21,8 @@ const defaultState = () => ({
     sleepHours: 0,
     steps: 0,
     exerciseMinutes: 0,
-    weight: null
+    weight: null,
+    sleepTrend: 'stable'
   }
 });
 
@@ -30,7 +31,7 @@ export async function readState() {
     const raw = await fs.readFile(dataFile, 'utf8');
     const state = JSON.parse(raw);
     if (!Array.isArray(state.captures)) state.captures = [];
-    if (!state.health) state.health = { sleepHours: 0, steps: 0, exerciseMinutes: 0, weight: null };
+    if (!state.health) state.health = { sleepHours: 0, steps: 0, exerciseMinutes: 0, weight: null, sleepTrend: 'stable' };
     return state;
   } catch {
     const initial = defaultState();
