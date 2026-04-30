@@ -38,3 +38,11 @@ Creates or updates a habit definition (`id`, `name`, optional `color`, `icon`).
 
 ## POST /api/habits/log
 Creates a habit completion log (`habitId`, optional `completed`, optional `date`).
+
+
+## POST /api/sync/finance/google-sheet?spreadsheetId=...&gid=...
+Imports a public Google Sheets tab via CSV export URL and maps rows to transactions.
+
+Requirements:
+- the sheet tab must be shared as **Anyone with the link (Viewer)**
+- finance columns should include: `date`, `description`, `category`, `amount`, `type`

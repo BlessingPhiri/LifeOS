@@ -26,3 +26,10 @@ npm run dev
 
 ## Next build step
 Migrate file-backed persistence to Postgres tables and add Google OAuth with real Sheets/Calendar sync adapters.
+
+
+## Google Sheets (free setup for now)
+Use a public-link sheet tab and call:
+`POST /api/sync/finance/google-sheet?spreadsheetId=<id>&gid=<gid>`
+
+This is a no-OAuth MVP path. Later we can upgrade to Google OAuth + private Sheets API.

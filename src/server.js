@@ -5,6 +5,7 @@ import { addCapture, addHabitLog, readState, updateCalendar, updateFinance, upda
 import { validateCalendarPayload, validateFinancePayload, validateHealthPayload } from './validation.js';
 import { normalizeCapture, validateCapturePayload } from './capture.js';
 import { computeWeeklyCompletion, normalizeHabit, normalizeHabitLog, validateHabitLogPayload, validateHabitPayload } from './habits.js';
+import { fetchSheetRows, normalizeFinanceRows } from './googleSheets.js';
 
 function sendJson(res, status, body) {
   res.writeHead(status, { 'content-type': 'application/json' });
@@ -45,6 +46,36 @@ async function parseJson(req) {
 
 export function createServer() {
   return http.createServer(async (req, res) => {
+
+    if (req.method === 'POST' && req.url.startsWith('/api/sync/finance/google-sheet')) {
+      try {
+        const url = new URL(req.url, 'http://localhost');
+        const spreadsheetId = url.searchParams.get('spreadsheetId');
+        const gid = url.searchParams.get('gid');
+        if (!spreadsheetId || !gid) {
+          return sendJson(res, 400, { error: 'spreadsheetId and gid query params are required.' });
+        }
+
+        const rows = await fetchSheetRows({ spreadsheetId, gid });
+        const normalized = normalizeFinanceRows(rows);
+        const monthIncome = normalized.filter((r) => r.type === 'income').reduce((sum, r) => sum + r.amount, 0);
+        const monthExpenses = normalized.filter((r) => r.type === 'expense').reduce((sum, r) => sum + Math.abs(r.amount), 0);
+
+        const finance = await updateFinance({
+          assets: 0,
+          liabilities: 0,
+          monthIncome,
+          monthExpenses,
+          monthBudget: 0,
+          transactions: normalized
+        });
+
+        return sendJson(res, 200, { ok: true, imported: normalized.length, finance });
+      } catch (error) {
+        return sendJson(res, 502, { error: error.message });
+      }
+    }
+
     if (req.method === 'POST' && req.url === '/api/sync/finance') {
       const body = await parseJson(req);
       if (!body) return sendJson(res, 400, { error: 'Invalid JSON body.' });
