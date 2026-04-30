@@ -24,3 +24,13 @@ File-backed storage remains the primary state store until full migration is comp
 ## Overview read path
 If `DATABASE_URL` is set, `GET /api/overview` attempts to read recent transactions from Postgres first and compute month income/expenses from those rows.
 If Postgres is unavailable, it safely falls back to file-backed state.
+
+
+## Write-through Postgres mode
+When `DATABASE_URL` is set:
+- Google Sheets finance imports write to Postgres `transactions`
+- `POST /api/habits` upserts into `habit_definitions`
+- `POST /api/habits/log` inserts into `habit_logs`
+- `POST /api/quick-capture` inserts into `quick_captures`
+
+File-backed storage is still written for backward compatibility during migration.

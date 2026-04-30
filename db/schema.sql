@@ -36,3 +36,18 @@ create table if not exists habit_logs (
   completed boolean not null default true,
   created_at timestamptz not null default now()
 );
+
+
+create table if not exists quick_captures (
+  id text primary key,
+  user_id uuid references users(id) on delete cascade,
+  capture_type text not null,
+  payload jsonb not null,
+  created_at timestamptz not null default now()
+);
+
+alter table habit_logs
+  add constraint if not exists habit_logs_habit_fk
+  foreign key (habit_id, user_id)
+  references habit_definitions(id, user_id)
+  on delete cascade;

@@ -44,3 +44,6 @@ When enabled, Google Sheets finance imports are also persisted to Postgres.
 
 
 With `DATABASE_URL` enabled, overview attempts Postgres transaction reads first and falls back to file storage if unavailable.
+
+
+Current Postgres support is **write-through mode** for finance imports, habits, habit logs, and quick captures, while file storage remains as fallback.

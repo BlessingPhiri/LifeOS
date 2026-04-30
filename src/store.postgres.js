@@ -67,3 +67,39 @@ export const listTransactions = withClient(async (client, limit = 100) => {
     type: row.tx_type
   }));
 });
+
+
+export const upsertHabitDefinition = withClient(async (client, habit) => {
+  await client.query(
+    `insert into habit_definitions (id, user_id, name, color, icon)
+     values ($1,$2,$3,$4,$5)
+     on conflict (id, user_id) do update
+     set name=excluded.name,
+         color=excluded.color,
+         icon=excluded.icon`,
+    [habit.id, defaultUserId, habit.name, habit.color || null, habit.icon || null]
+  );
+
+  return habit;
+});
+
+export const insertHabitLog = withClient(async (client, log) => {
+  await client.query(
+    `insert into habit_logs (user_id, habit_id, log_date, completed)
+     values ($1,$2,$3,$4)`,
+    [defaultUserId, log.habitId, log.date, Boolean(log.completed)]
+  );
+
+  return log;
+});
+
+export const insertQuickCapture = withClient(async (client, capture) => {
+  await client.query(
+    `insert into quick_captures (id, user_id, capture_type, payload)
+     values ($1,$2,$3,$4::jsonb)
+     on conflict (id) do nothing`,
+    [capture.id, defaultUserId, capture.type, JSON.stringify(capture.value || {})]
+  );
+
+  return capture;
+});

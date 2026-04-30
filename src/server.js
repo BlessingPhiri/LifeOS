@@ -149,7 +149,11 @@ export function createServer() {
       const errors = validateCapturePayload(body);
       if (errors.length) return sendJson(res, 422, { error: 'Validation failed.', details: errors });
       const capture = await addCapture(normalizeCapture(body));
-      return sendJson(res, 201, { ok: true, capture });
+      if (process.env.DATABASE_URL) {
+        const { insertQuickCapture } = await import('./store.postgres.js');
+        await insertQuickCapture(capture);
+      }
+      return sendJson(res, 201, { ok: true, capture, persistedToPostgres: Boolean(process.env.DATABASE_URL) });
     }
 
 
@@ -159,7 +163,11 @@ export function createServer() {
       const errors = validateHabitPayload(body);
       if (errors.length) return sendJson(res, 422, { error: 'Validation failed.', details: errors });
       const habit = await upsertHabit(normalizeHabit(body));
-      return sendJson(res, 200, { ok: true, habit });
+      if (process.env.DATABASE_URL) {
+        const { upsertHabitDefinition } = await import('./store.postgres.js');
+        await upsertHabitDefinition(habit);
+      }
+      return sendJson(res, 200, { ok: true, habit, persistedToPostgres: Boolean(process.env.DATABASE_URL) });
     }
 
     if (req.method === 'POST' && req.url === '/api/habits/log') {
@@ -168,7 +176,11 @@ export function createServer() {
       const errors = validateHabitLogPayload(body);
       if (errors.length) return sendJson(res, 422, { error: 'Validation failed.', details: errors });
       const log = await addHabitLog(normalizeHabitLog(body));
-      return sendJson(res, 201, { ok: true, log });
+      if (process.env.DATABASE_URL) {
+        const { insertHabitLog } = await import('./store.postgres.js');
+        await insertHabitLog(log);
+      }
+      return sendJson(res, 201, { ok: true, log, persistedToPostgres: Boolean(process.env.DATABASE_URL) });
     }
 
     if (req.method === 'GET' && req.url === '/api/insights') {
