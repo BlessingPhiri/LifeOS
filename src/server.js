@@ -2,6 +2,7 @@ import http from 'node:http';
 import { generateInsights } from './insights.js';
 import { habitScore, monthlyNetIncome, netWorth, savingsRate } from './metrics.js';
 import { readState, updateCalendar, updateFinance } from './store.js';
+import { validateCalendarPayload, validateFinancePayload } from './validation.js';
 
 function sendJson(res, status, body) {
   res.writeHead(status, { 'content-type': 'application/json' });
@@ -45,6 +46,8 @@ export function createServer() {
     if (req.method === 'POST' && req.url === '/api/sync/finance') {
       const body = await parseJson(req);
       if (!body) return sendJson(res, 400, { error: 'Invalid JSON body.' });
+      const errors = validateFinancePayload(body);
+      if (errors.length) return sendJson(res, 422, { error: 'Validation failed.', details: errors });
       const finance = await updateFinance(normalizeFinance(body));
       return sendJson(res, 200, { ok: true, finance });
     }
@@ -52,6 +55,8 @@ export function createServer() {
     if (req.method === 'POST' && req.url === '/api/sync/calendar') {
       const body = await parseJson(req);
       if (!body) return sendJson(res, 400, { error: 'Invalid JSON body.' });
+      const errors = validateCalendarPayload(body);
+      if (errors.length) return sendJson(res, 422, { error: 'Validation failed.', details: errors });
       const calendar = await updateCalendar(normalizeCalendar(body));
       return sendJson(res, 200, { ok: true, calendar });
     }
