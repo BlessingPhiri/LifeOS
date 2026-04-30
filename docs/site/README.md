@@ -9,3 +9,8 @@ This folder contains a static page (`index.html`) compatible with GitHub Pages.
 
 ## Note
 If hosted on GitHub Pages, your backend API must be publicly accessible and configured for CORS.
+
+
+## Demo fallback
+If API is unreachable/CORS-blocked, the page automatically shows demo data so you can verify the static site works.
+You can also click **Use Demo Data** manually.

@@ -53,3 +53,5 @@ Current Postgres support is **write-through mode** for finance imports, habits, 
 A static frontend starter now exists at `docs/site/index.html` so Pages has an actual HTML entrypoint.
 
 You can host this on GitHub Pages and point it to your API URL.
+
+The static page includes a demo data fallback, so GitHub Pages can be validated even before backend deployment.

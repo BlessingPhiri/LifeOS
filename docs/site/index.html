@@ -27,6 +27,7 @@
       <label>API Base URL</label>
       <input id="apiBase" placeholder="http://localhost:3000" />
       <button id="loadBtn">Load Overview</button>
+      <button id="demoBtn" style="margin-left:8px;background:#3b4b7a;">Use Demo Data</button>
       <p class="muted" id="status"></p>
     </div>
 
@@ -45,6 +46,32 @@
 
   <script>
     const el = (id) => document.getElementById(id);
+
+    const demoOverview = {
+      dashboard: { netWorth: 42000, savingsRate: 22.5, habitScore: 71.4, healthScore: 78.2 },
+      insights: [
+        { severity: 'medium', message: 'Savings rate is trending up. Keep consistency.' },
+        { severity: 'low', message: 'Schedule load is moderate today.' },
+        { severity: 'medium', message: 'Habit completion below 80% this week.' }
+      ]
+    };
+
+    function renderOverview(data) {
+      el('netWorth').textContent = data.dashboard?.netWorth ?? '-';
+      el('savingsRate').textContent = `${data.dashboard?.savingsRate ?? '-'}%`;
+      el('habitScore').textContent = `${data.dashboard?.habitScore ?? '-'}%`;
+      el('healthScore').textContent = `${data.dashboard?.healthScore ?? '-'}%`;
+
+      const list = el('insights');
+      list.innerHTML = '';
+      (data.insights || []).forEach((insight) => {
+        const li = document.createElement('li');
+        li.textContent = `[${insight.severity}] ${insight.message}`;
+        list.appendChild(li);
+      });
+    }
+
+
     el('loadBtn').addEventListener('click', async () => {
       const base = el('apiBase').value.trim();
       if (!base) return (el('status').textContent = 'Enter API base URL first.');
@@ -54,23 +81,18 @@
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        el('netWorth').textContent = data.dashboard?.netWorth ?? '-';
-        el('savingsRate').textContent = `${data.dashboard?.savingsRate ?? '-'}%`;
-        el('habitScore').textContent = `${data.dashboard?.habitScore ?? '-'}%`;
-        el('healthScore').textContent = `${data.dashboard?.healthScore ?? '-'}%`;
-
-        const list = el('insights');
-        list.innerHTML = '';
-        (data.insights || []).forEach((insight) => {
-          const li = document.createElement('li');
-          li.textContent = `[${insight.severity}] ${insight.message}`;
-          list.appendChild(li);
-        });
+        renderOverview(data);
 
         el('status').textContent = 'Loaded successfully.';
       } catch (err) {
-        el('status').textContent = `Failed: ${err.message}. (For GitHub Pages, API must allow CORS and be publicly reachable.)`;
+        renderOverview(demoOverview);
+        el('status').textContent = `Failed: ${err.message}. Showing demo data. (For live data, API must allow CORS and be publicly reachable.)`;
       }
+    });
+
+    el('demoBtn').addEventListener('click', () => {
+      renderOverview(demoOverview);
+      el('status').textContent = 'Demo data loaded.';
     });
   </script>
 </body>
