@@ -17,6 +17,8 @@ const defaultState = () => ({
     todayEvents: []
   },
   captures: [],
+  habits: [],
+  habitLogs: [],
   health: {
     sleepHours: 0,
     steps: 0,
@@ -32,6 +34,8 @@ export async function readState() {
     const state = JSON.parse(raw);
     if (!Array.isArray(state.captures)) state.captures = [];
     if (!state.health) state.health = { sleepHours: 0, steps: 0, exerciseMinutes: 0, weight: null, sleepTrend: 'stable' };
+    if (!Array.isArray(state.habits)) state.habits = [];
+    if (!Array.isArray(state.habitLogs)) state.habitLogs = [];
     return state;
   } catch {
     const initial = defaultState();
@@ -57,6 +61,23 @@ export async function updateCalendar(calendar) {
   state.calendar = calendar;
   await writeState(state);
   return state.calendar;
+}
+
+export async function upsertHabit(habit) {
+  const state = await readState();
+  const existingIndex = state.habits.findIndex((item) => item.id === habit.id);
+  if (existingIndex >= 0) state.habits[existingIndex] = { ...state.habits[existingIndex], ...habit };
+  else state.habits.push(habit);
+  await writeState(state);
+  return habit;
+}
+
+export async function addHabitLog(log) {
+  const state = await readState();
+  state.habitLogs.push(log);
+  state.habitLogs = state.habitLogs.slice(-500);
+  await writeState(state);
+  return log;
 }
 
 export async function updateHealth(health) {

@@ -1,9 +1,10 @@
 import http from 'node:http';
 import { generateInsights } from './insights.js';
 import { habitScore, healthScore, monthlyNetIncome, netWorth, savingsRate } from './metrics.js';
-import { addCapture, readState, updateCalendar, updateFinance, updateHealth } from './store.js';
+import { addCapture, addHabitLog, readState, updateCalendar, updateFinance, updateHealth, upsertHabit } from './store.js';
 import { validateCalendarPayload, validateFinancePayload, validateHealthPayload } from './validation.js';
 import { normalizeCapture, validateCapturePayload } from './capture.js';
+import { computeWeeklyCompletion, normalizeHabit, normalizeHabitLog, validateHabitLogPayload, validateHabitPayload } from './habits.js';
 
 function sendJson(res, status, body) {
   res.writeHead(status, { 'content-type': 'application/json' });
@@ -88,11 +89,30 @@ export function createServer() {
       return sendJson(res, 201, { ok: true, capture });
     }
 
+
+    if (req.method === 'POST' && req.url === '/api/habits') {
+      const body = await parseJson(req);
+      if (!body) return sendJson(res, 400, { error: 'Invalid JSON body.' });
+      const errors = validateHabitPayload(body);
+      if (errors.length) return sendJson(res, 422, { error: 'Validation failed.', details: errors });
+      const habit = await upsertHabit(normalizeHabit(body));
+      return sendJson(res, 200, { ok: true, habit });
+    }
+
+    if (req.method === 'POST' && req.url === '/api/habits/log') {
+      const body = await parseJson(req);
+      if (!body) return sendJson(res, 400, { error: 'Invalid JSON body.' });
+      const errors = validateHabitLogPayload(body);
+      if (errors.length) return sendJson(res, 422, { error: 'Validation failed.', details: errors });
+      const log = await addHabitLog(normalizeHabitLog(body));
+      return sendJson(res, 201, { ok: true, log });
+    }
+
     if (req.method === 'GET' && req.url === '/api/insights') {
       const state = await readState();
       const insights = generateInsights({
         finance: state.finance,
-        habits: { weeklyCompletionRate: 0 },
+        habits: { weeklyCompletionRate: computeWeeklyCompletion(state.habits || [], state.habitLogs || []) },
         health: state.health || { sleepTrend: 'stable' },
         calendar: state.calendar,
         projects: null
@@ -105,16 +125,17 @@ export function createServer() {
       const finance = state.finance;
       const calendar = state.calendar;
       const health = state.health || { sleepHours: 0, steps: 0, exerciseMinutes: 0, weight: null, sleepTrend: 'stable' };
+      const weeklyHabitRate = computeWeeklyCompletion(state.habits || [], state.habitLogs || []);
       const dashboard = {
         netWorth: netWorth(finance),
         monthNetIncome: monthlyNetIncome({ income: finance.monthIncome, expenses: finance.monthExpenses }),
         savingsRate: savingsRate({ income: finance.monthIncome, expenses: finance.monthExpenses }),
-        habitScore: habitScore([]),
+        habitScore: weeklyHabitRate,
         healthScore: healthScore(health)
       };
       const insights = generateInsights({
         finance,
-        habits: { weeklyCompletionRate: 0 },
+        habits: { weeklyCompletionRate: computeWeeklyCompletion(state.habits || [], state.habitLogs || []) },
         health,
         calendar,
         projects: null
@@ -126,7 +147,8 @@ export function createServer() {
         todayEvents: calendar.todayEvents,
         insights: insights.slice(0, 3),
         captures: state.captures.slice(0, 10),
-        health
+        health,
+        habits: { weeklyCompletionRate: weeklyHabitRate, total: (state.habits || []).length }
       });
     }
 

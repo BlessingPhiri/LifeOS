@@ -31,3 +31,10 @@ Returns normalized health snapshot and supports `422` validation responses.
 
 ## GET /api/insights
 Returns the prioritized insight list only (same engine used by `/api/overview`).
+
+
+## POST /api/habits
+Creates or updates a habit definition (`id`, `name`, optional `color`, `icon`).
+
+## POST /api/habits/log
+Creates a habit completion log (`habitId`, optional `completed`, optional `date`).
