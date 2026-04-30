@@ -44,6 +44,33 @@ async function parseJson(req) {
   }
 }
 
+
+async function loadFinanceSnapshot(stateFinance) {
+  if (!process.env.DATABASE_URL) return stateFinance;
+
+  try {
+    const { listTransactions } = await import('./store.postgres.js');
+    const transactions = await listTransactions(200);
+
+    const monthIncome = transactions
+      .filter((tx) => tx.type === 'income')
+      .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+
+    const monthExpenses = transactions
+      .filter((tx) => tx.type === 'expense')
+      .reduce((sum, tx) => sum + Math.abs(Number(tx.amount || 0)), 0);
+
+    return {
+      ...stateFinance,
+      monthIncome,
+      monthExpenses,
+      transactions
+    };
+  } catch {
+    return stateFinance;
+  }
+}
+
 export function createServer() {
   return http.createServer(async (req, res) => {
 
@@ -158,7 +185,7 @@ export function createServer() {
 
     if (req.method === 'GET' && req.url === '/api/overview') {
       const state = await readState();
-      const finance = state.finance;
+      const finance = await loadFinanceSnapshot(state.finance);
       const calendar = state.calendar;
       const health = state.health || { sleepHours: 0, steps: 0, exerciseMinutes: 0, weight: null, sleepTrend: 'stable' };
       const weeklyHabitRate = computeWeeklyCompletion(state.habits || [], state.habitLogs || []);

@@ -19,3 +19,8 @@ Migrate the same state model to Postgres tables and keep API contracts unchanged
 ## Postgres mode (optional now)
 If `DATABASE_URL` is set, Google Sheets finance imports are also upserted into Postgres `transactions`.
 File-backed storage remains the primary state store until full migration is completed.
+
+
+## Overview read path
+If `DATABASE_URL` is set, `GET /api/overview` attempts to read recent transactions from Postgres first and compute month income/expenses from those rows.
+If Postgres is unavailable, it safely falls back to file-backed state.

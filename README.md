@@ -41,3 +41,6 @@ This is a no-OAuth MVP path. Later we can upgrade to Google OAuth + private Shee
 3. Start server with `npm run dev`.
 
 When enabled, Google Sheets finance imports are also persisted to Postgres.
+
+
+With `DATABASE_URL` enabled, overview attempts Postgres transaction reads first and falls back to file storage if unavailable.

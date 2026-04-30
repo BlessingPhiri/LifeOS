@@ -39,6 +39,7 @@ test('API sync + overview flow works', async () => {
   assert.equal(overview.dashboard.monthNetIncome, 800);
   assert.equal(overview.todayEvents.length, 1);
   assert.equal(overview.recentTransactions.length, 1);
+  assert.equal(Array.isArray(overview.recentTransactions), true);
 
   await new Promise((resolve) => server.close(resolve));
 });
