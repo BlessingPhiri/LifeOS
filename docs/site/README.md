@@ -14,3 +14,6 @@ If hosted on GitHub Pages, your backend API must be publicly accessible and conf
 ## Demo fallback
 If API is unreachable/CORS-blocked, the page automatically shows demo data so you can verify the static site works.
 You can also click **Use Demo Data** manually.
+
+
+For GitHub Pages configured to `/docs`, this repo includes `docs/index.html` redirecting to `docs/site/index.html`.

@@ -55,3 +55,5 @@ A static frontend starter now exists at `docs/site/index.html` so Pages has an a
 You can host this on GitHub Pages and point it to your API URL.
 
 The static page includes a demo data fallback, so GitHub Pages can be validated even before backend deployment.
+
+For GitHub Pages `/docs` mode, `docs/index.html` now redirects to `docs/site/index.html`.
